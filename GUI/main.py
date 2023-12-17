@@ -1,232 +1,257 @@
-import tkinter as tk
-from tkinter import ttk
 
 import customtkinter
-#from ttkbootstrap import *
 import customtkinter as ctk
-import pathlib, os
-import glob
-from PIL import ImageTk, Image
-CURRENT_PATH = pathlib.Path(__file__).parent.resolve()
-RELATIVE_ASSETS_PATH = "../frame0/"
+
+import webbrowser
+
+from PIL import Image, ImageSequence
+
+import threading as th
+import time
+
+ctk.set_default_color_theme("Themes/TransLave.json")
+ctk.set_appearance_mode("dark")
 
 
 class App(ctk.CTk):
-    def __init__(self, *args, **kwargs):
-        ctk.CTk.__init__(self, *args, **kwargs)
+    def __init__(self):
+        super().__init__()
+        self.theme = 0
         self.geometry("1080x720")
         self.title('Translave')
 
         container = ctk.CTkFrame(self)
-        container.pack(side="top",fill="both", expand=True)
+        container.pack(side="top", fill="both", expand=True)
 
-        self.minsize(720, 536)
-        # self.main_frame = MainWindow(parent=self)
-        # self.main_frame.grid(row=0, column=0, sticky="nwse")
-
+        self.minsize(720, 720)
         self.frames = {}
-        for F in (MainWindow, SettingWindow):
+
+        for F in (MainWindow, SettingsWindow):
             page_name = F.__name__
-            frame = F(parent=container, controller=self)
+
+            frame = F(parent=container)
+            print(frame)
             self.frames[page_name] = frame
             frame.grid(column=0, row=0, sticky="nsew")
+        self.draw_header()
 
-        self.show_frame("MainWindow")
+    def draw_header(self):
 
-    def show_frame(self, cont):
-        frame = self.frames[cont]
-        frame.tkraise()
-
-
-class MainWindow(ctk.CTkFrame):
-    def __init__(self, parent, controller):
-        "HeaderFrame"
-        ctk.CTkFrame.__init__(self, parent)
-        self.controller = controller
-        self.header_frame = ttk.Frame(self)
-        self.main_frame = ttk.Frame(self)
-        self.bottom_info_frame = ttk.Frame(self)
-
-        self.header_frame.place(
+        header_frame = ctk.CTkFrame(self)
+        header_frame.configure(fg_color=( "#ffa667", "#1e222d",))
+        header_frame.place(
             x=0, y=0,
             relwidth=1, relheight=0.15)
-        self.main_frame.place(
-            x=0, rely=0.15,
-            relwidth=1, relheight=0.80)
-        self.bottom_info_frame.place(
-            x=0, rely=0.95,
-            relwidth=1, relheight=0.05)
+        header_frame.columnconfigure((0, 1, 2, 3), weight=1)
 
-        self.header_frame.columnconfigure((0,1,2,3), weight=1)
-
-        self.header_frame.rowconfigure((0), weight=1)
-
-        self.title_text = ctk.CTkLabel(
-            self.header_frame,
-            text="TRANSLAVE",text_color=("Red","BLACK")
+        header_frame.rowconfigure((0), weight=1)
+        font = ctk.CTkFont(family="Konstanting", size=70)
+        title_text = ctk.CTkLabel(
+            header_frame,
+            text="TRANSLAVE", font=font
         )
 
-        self.title_text.grid(
+        title_text.grid(
             row=0, column=0,
             padx=50, pady=20,
             sticky='nswe')
 
-        self.settings_button = ctk.CTkButton(self.header_frame, text='settings',
-                                             command=lambda: controller.show_frame("SettingWindow"))
-        self.settings_button.grid(
-            row=0,  column=3,
-            padx=10,pady=10,
-            sticky='nswe',)
+        theme = ctk.StringVar(value="light")
 
-        """SwitchThemes"""
+        def switch_theme_event():
+
+            if theme.get() == "dark":
+                ctk.set_appearance_mode("dark")
+                theme.set("light")
+            else:
+                ctk.set_appearance_mode("light")
+                theme.set("dark")
+
+        theme_switch_button = ctk.CTkButton(
+                header_frame,
+                corner_radius=15,
+                command=switch_theme_event).grid(row=0, column=2,
+                                         padx=5, pady=10,
+                                         sticky='nswe')
+
+        header_value = ctk.StringVar(value="MainWindow")
+
+        def show_frame():
+            frame = self.frames[header_value.get()]
+            print(frame)
+            frame.tkraise()
+            if header_value.get() == "MainWindow":
+                header_value.set("SettingsWindow")
+            else:
+                header_value.set("MainWindow")
+        settings_button = ctk.CTkButton(header_frame, text='settings', command=show_frame)
+
+        settings_button.grid(
+            row=0, column=3,
+            padx=10, pady=10,
+            sticky='nswe', )
+
+        def callback():
+            webbrowser.open_new(r"https://github.com/Dr1MTeam/Translave")
+
+        "InfoBottomText"
+
+        bottom_info_frame = ctk.CTkFrame(self)
+        bottom_info_frame.place(x=0, rely=0.95,
+            relwidth=1, relheight=0.05)
+
+        bottom_info_frame.columnconfigure(0, weight=1)
+        bottom_info_frame.configure(fg_color=("#ffa667", "#1e222d",))
+
+        text_info = ctk.CTkButton(bottom_info_frame, text="@Dr1mTeam/TransLave",
+                                  command=callback,  fg_color=("#ffa667", "#1e222d",))
+        text_info.grid(column=1, row=0, sticky="nse", padx=15, pady=5)
 
 
-        switch_var = ctk.IntVar(value=1)
+class MainWindow(ctk.CTkFrame):
+    def __init__(self, parent):
+        super().__init__(master=parent)
+        "HeaderFrame"
 
-        def switch_event():
-            ctk.set_appearance_mode("light") if switch_var.get() else ctk.set_appearance_mode("dark")
-            switch_var.set(not switch_var.get())
-
-
-        self.theme_switch_image = ctk.CTkImage(Image.open('../frame0/button_1.png'), size=(150, 70))
-
-        self.theme_switch_button = ctk.CTkButton(
-            self.header_frame,
-            corner_radius=15,
-
-            fg_color=("#FFFF00", "#0000FF"),
-            command=switch_event).grid(row=0, column=2,
-                                     padx=5, pady=10,
-                                     sticky='nswe')
+        self.main_frame = ctk.CTkFrame(self)
+        self.main_frame.place(
+            x=0, rely=0.15,
+            relwidth=1, relheight=0.80)
 
         "MainFrame"
 
         self.main_frame.columnconfigure((0,1), weight=1)
-        self.main_frame.rowconfigure((0), weight=1)
+        self.main_frame.rowconfigure((0,1), weight=1)
 
-        self.text_translation = ctk.CTkTextbox(self.main_frame,activate_scrollbars=True)
+        self.text_translation = ctk.CTkTextbox(self.main_frame, activate_scrollbars=True)
         self.text_translation.grid(
             row=0, column=0,
             padx=10, pady=30,
             rowspan=1, sticky='nswe',)
         self.text_to_translate = ctk.CTkTextbox(self.main_frame,activate_scrollbars=True)
         self.text_to_translate.grid(
-            row=0,column=1,
+            row=0, column=1,
             padx=10, pady=30,
             rowspan=1, sticky='nswe',)
 
-        "InfoBottomText"
-        self.bottom_info_frame.columnconfigure((0,1), weight=1)
-
-        self.text_info = ctk.CTkLabel(self.bottom_info_frame, text="@DreamTeam/Translave", text_color="#FF00FF")
-        self.text_info.grid(column=1, row=0, sticky="nse", padx=15)
 
 
-class SettingWindow(ctk.CTkFrame):
-    def __init__(self, parent, controller):
-        "HeaderFrame"
-        ctk.CTkFrame.__init__(self, parent)
-        self.controller = controller
 
-        self.header_frame = ttk.Frame(self)
-        self.main_frame = ttk.Frame(self)
-        self.bottom_info_frame = ttk.Frame(self)
-        parent.grid_columnconfigure(0, weight=1)
+class SettingsWindow(ctk.CTkFrame):
+    def __init__(self, parent):
+        super().__init__(master=parent)
+
+        self.main_frame = ctk.CTkFrame(self)
+
+        parent.grid_columnconfigure(0,  weight=1)
         parent.grid_rowconfigure(0, weight=1)
-        self.header_frame.place(
-            x=0, y=0,
-            relwidth=1, relheight=0.15)
+
         self.main_frame.place(
             x=0, rely=0.15,
             relwidth=1, relheight=0.80)
-        self.bottom_info_frame.place(
-            x=0, rely=0.95,
-            relwidth=1, relheight=0.05)
-        self.header_frame.columnconfigure((0, 1, 2, 3), weight=1)
 
-        self.header_frame.rowconfigure((0), weight=1)
+        option_menu_var = customtkinter.StringVar(value="MT5-translave")
 
-        self.title_text = ctk.CTkLabel(
-            self.header_frame,
-            text="TRANSLAVE", text_color=("Red", "BLACK")
-        )
-
-        self.title_text.grid(
-            row=0, column=0,
-            padx=50, pady=20,
-            sticky='nswe')
-
-        self.return_button = ctk.CTkButton(self.header_frame, text='return',
-                                             command=lambda: controller.show_frame("MainWindow"))
-        self.return_button.grid(
-            row=0, column=3,
-            padx=10, pady=10,
-            sticky='nswe', )
-
-        switch_var = ctk.IntVar(value=1)
-
-        def switch_event():
-            ctk.set_appearance_mode("light") if switch_var.get() else ctk.set_appearance_mode("dark")
-            switch_var.set(not switch_var.get())
-
-        self.theme_switch_button = ctk.CTkButton(
-            self.header_frame,
-            corner_radius=15,
-
-            fg_color=("#FFFF00", "#0000FF"),
-            command=switch_event).grid(row=0, column=2,
-                                       padx=5, pady=10,
-                                       sticky='nswe')
-        ml_model_var = ctk.IntVar(0)
-        def switch_ml():
-            print("model switched")
+        def switch_ml(choice):
+            print("model switched to ", choice)
             " Здесь часть программы с изменением модели"
 
-        self.ml_switch_btn_1 = ctk.CTkRadioButton(self.main_frame,
-                                              text="модель А",
-                                              command=switch_ml(),
-                                              variable=ml_model_var,
-                                              value=0,
-                                              text_color=("#000000", "red"))
-        self.ml_switch_btn_1.grid(
-            row=0, column=1, padx=120, pady=10, sticky='nswe',
-        )
-        self.ml_switch_btn_2 = ctk.CTkRadioButton(self.main_frame,
-                                              text="модель Б",
-                                              command=switch_ml(),
-                                              variable=ml_model_var,
-                                              value=1,
-                                              text_color=("#000000", "red"))
-        self.ml_switch_btn_2.grid(
-            row=1,  column=1, padx=120, pady=10, sticky='nswe',
+
+        self.ml_label = ctk.CTkLabel(self.main_frame, text="Выбор модели перевода:")
+        self.ml_label.grid(
+            row=0, column=1, padx=40, pady=30, sticky='nswe',
         )
 
-        input_action_var = ctk.IntVar(0)
-        def switch_ml():
+        self.ml_switch_btn_1 = ctk.CTkOptionMenu(self.main_frame,
+                                                 values=["MT5 ", "Mt5-translave"],
+                                                 command=switch_ml,
+                                                 variable=option_menu_var
+        )
+
+        self.ml_switch_btn_1.grid(
+            row=0, column=2, padx=0, pady=30, sticky='nswe',
+        )
+
+        def switch_input():
             print("model switched")
             " Здесь часть программы с переключением типа ввода"
 
-        self.input_switch_btn_1 = ctk.CTkRadioButton(self.main_frame,
-                                                     text="Ввод 1",
-                                                     command=switch_ml(),
-                                                     variable=input_action_var,
-                                                     value=0,
-                                                     text_color=("#000000", "red"))
-        self.input_switch_btn_2 = ctk.CTkRadioButton(self.main_frame,
-                                                     text="Ввод 2",
-                                                     command=switch_ml(),
-                                                     variable=input_action_var,
-                                                     value=1,
-                                                     text_color=("#000000", "red"))
 
-        self.input_switch_btn_1.grid(
-            row=0,  column=2, padx=60, pady=10, sticky='nswe',
-        )
-        self.input_switch_btn_2.grid(
-            row=1,  column=2, padx=60, pady=10, sticky='nswe',
-        )
+        def unpack_gif(src):
+            # Load Gif
+            image = Image.open(src)
+
+            # Get frames and disposal method for each frame
+            frames = []
+            disposal = []
+            for gifFrame in ImageSequence.Iterator(image):
+                disposal.append(gifFrame.disposal_method)
+                frames.append(gifFrame.convert('P'))
+            print(frames)
+            # Loop through frames, and edit them based on their disposal method
+            output = []
+            lastFrame = None
+            thisFrame = None
+            for i, loadedFrame in enumerate(frames):
+                # Update thisFrame
+                print(loadedFrame)
+                thisFrame = loadedFrame
+
+                # If the disposal method is 2
+                if disposal[i] == 2:
+                    # Check that this is not the first frame
+                    if i != 0:
+                        # Pastes thisFrames opaque pixels over lastFrame and appends lastFrame to output
+                        lastFrame.paste(thisFrame, mask=thisFrame.convert('RGBA'))
+                        output.append(lastFrame)
+                    else:
+                        output.append(thisFrame)
+
+                # If the disposal method is 1 or 0
+                elif disposal[i] == 1 or disposal[i] == 0:
+                    # Appends thisFrame to output
+                    output.append(thisFrame)
+
+                # If disposal method if anything other than 2, 1, or 0
+                else:
+                    raise ValueError(
+                        'Disposal Methods other than 2:Restore to Background, 1:Do Not Dispose, and 0:No Disposal are supported at this time')
+
+                # Update lastFrame
+                lastFrame = loadedFrame
+
+            return output
+
+        imgr = unpack_gif("GUI_images/VolcanoGif.gif")
+        self.volcano_button = ctk.CTkButton(self.main_frame, text="",)
+
+        def gif(img):
+            time.sleep(0.28)
+            while True:
+
+                for i, frame in enumerate(img[2:]):
+                    self.main_frame.update()
+                    self.volcano_button.configure(self.main_frame,
+                                                  anchor=(0,0),
+                                                  fg_color=("#ff9300", "#464a55",),
+                                                  state="disabled",
+                                                  image=ctk.CTkImage(light_image=frame,
+                                                                     dark_image=frame,
+                                                                     size=(420, 480)))
+
+                    self.main_frame.update()
+
+                    print(frame, i)
+                    time.sleep(0.16)
+
+        a = th.Thread(daemon=True, target=gif,args=[imgr])
+        a.start()
+        self.main_frame.columnconfigure(3, weight=1)
+        self.main_frame.rowconfigure(1, weight=1)
+        self.volcano_button.grid(row=1, column=3, sticky="se")
 
 
 if __name__ == "__main__":
     app = App()
+
     app.mainloop()
