@@ -2,6 +2,14 @@ import pyscreenshot
 import os
 from pynput import mouse
 import keyboard
+import easyocr
+
+
+def text_recognition(file_path):
+    reader = easyocr.Reader(["ru", "en"])
+    result =reader.readtext(file_path, detail=0)
+
+    return result
 
 
 def on_click(x, y, button, pressed, new_arr=(0, 0)):
@@ -39,8 +47,8 @@ def on_click(x, y, button, pressed, new_arr=(0, 0)):
                 print('type 4 : x1 >= x2 y1 >= y2')
                 image = pyscreenshot.grab(bbox=(arr[2], arr[3], arr[0], arr[1]))
 
-            image.show(path)
             image.save(path)
+            print(text_recognition(file_path=path))
 
         except Exception:
             print("Ошибка при создании скриншота")

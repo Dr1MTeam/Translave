@@ -1,16 +1,9 @@
-import easyocr
-
-
-def text_recognition(file_path):
-    reader = easyocr.Reader(["ru", "en"])
-    result =reader.readtext(file_path, detail=0)
-
-    return result
+import test
 
 
 def main():
-    file_path = r'assets\new.png'
-    print(text_recognition(file_path=file_path))
+    app = test.ScreenShotApp()
+    app.start()
 
 
 if __name__ == "__main__":
