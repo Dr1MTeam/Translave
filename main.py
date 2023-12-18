@@ -8,10 +8,10 @@ from PIL import Image, ImageSequence
 
 import threading as th
 import time
+import test
 
 
-
-ctk.set_default_color_theme("Themes/TransLave.json")
+ctk.set_default_color_theme("GUI/Themes/TransLave.json")
 ctk.set_appearance_mode("dark")
 
 
@@ -32,7 +32,7 @@ class App(ctk.CTk):
             page_name = F.__name__
 
             frame = F(parent=container)
-            print(frame)
+
             self.frames[page_name] = frame
             frame.grid(column=0, row=0, sticky="nsew")
         self.draw_header()
@@ -145,6 +145,7 @@ class SettingsWindow(ctk.CTkFrame):
 
         parent.grid_columnconfigure(0,  weight=1)
         parent.grid_rowconfigure(0, weight=1)
+        
 
         self.main_frame.place(
             x=0, rely=0.15,
@@ -222,7 +223,7 @@ class SettingsWindow(ctk.CTkFrame):
 
             return output
 
-        imgr = unpack_gif("GUI_images/VolcanoGif.gif")
+        imgr = unpack_gif("GUI/GUI_images/VolcanoGif.gif")
         self.volcano_button = ctk.CTkButton(self.main_frame, text="",)
 
         def gif(img):
@@ -240,8 +241,6 @@ class SettingsWindow(ctk.CTkFrame):
                                                                      size=(420, 480)))
 
                     self.main_frame.update()
-
-                    print(frame, i)
                     time.sleep(0.16)
 
         a = th.Thread(daemon=True, target=gif,args=[imgr])
@@ -252,5 +251,10 @@ class SettingsWindow(ctk.CTkFrame):
 
 if __name__ == "__main__":
     app = App()
-
     app.mainloop()
+
+
+    # text_rec = test.ScreenShotApp()
+    # text_rec.start()
+"Не работает, посмотри метод bind в Tkinter, можешь применить его как self.bind в классе APP"
+
