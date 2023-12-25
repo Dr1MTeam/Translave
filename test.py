@@ -3,7 +3,7 @@ import os
 from pynput import mouse
 import keyboard
 import easyocr
-
+from tkinter import *
 
 class TextRecognition:
     def text_recognition(self, file_path):
@@ -20,6 +20,7 @@ class TextRecognition:
 class ScreenShotApp:
 
     def __init__(self):
+        self.root = Tk()
         self.path = r"assets\new.png"
         self.hot_key = 'ctrl+p'
         self.arr = [0, 0, 0, 0]
@@ -34,7 +35,6 @@ class ScreenShotApp:
 
     def change_hot_key(self):
         self.hot_key = input()
-        pass
 
     def screenshot_activate(self):
         self.clear_images()
@@ -43,8 +43,25 @@ class ScreenShotApp:
             listener.join()
 
     def start(self):
-        keyboard.add_hotkey(self.hot_key, self.screenshot_activate)
-        keyboard.wait()
+        print('start')
+    #     root.bind('<KeyPress>', self.on_click_keyboard)
+    #     root.bind('<KeyRelease>', self.on_release_keyboard)
+        self.root.bind('<KeyPress>', self.on_click_keyboard)
+        self.root.bind('<KeyRelease>', self.on_release_keyboard)
+
+        self.root.mainloop()
+
+
+    def on_release_keyboard(self, event):
+        print('{0} release'.format(event.keysym))
+
+        if event.keysym == 'Control_L':
+            print('yes')
+            self.screenshot_activate()
+
+
+    def on_click_keyboard(self, event):
+        print('{0} pressed'.format(event.keysym))
 
     def get_res(self):
         return self.res
@@ -99,4 +116,7 @@ class ScreenShotApp:
                 return False
 
 
+
+app = ScreenShotApp()
+app.start()
 
