@@ -5,22 +5,31 @@ import keyboard
 import easyocr
 from tkinter import *
 
-class TextRecognition:
-    def text_recognition(self, file_path):
+# class TextRecognition:
+#     def text_recognition(self, file_path):
+#
+#         reader = easyocr.Reader(["ru", "en"])
+#         result = reader.readtext(file_path, detail=0)
+#         res_string = ""
+#         for i in result:
+#             res_string += i + ' '
+#
+#         return res_string
 
-        reader = easyocr.Reader(["ru", "en"])
-        result = reader.readtext(file_path, detail=0)
-        res_string = ""
-        for i in result:
-            res_string += i + ' '
+def text_recognition(file_path):
+    reader = easyocr.Reader(["ru", "en"])
+    result = reader.readtext(file_path, detail=0)
+    res_string = ""
+    for i in result:
+        res_string += i + ' '
+    print(res_string)
 
-        return res_string
+    return res_string
 
 
 class ScreenShotApp:
 
     def __init__(self):
-        self.root = Tk()
         self.path = r"assets\new.png"
         self.hot_key = 'ctrl+p'
         self.arr = [0, 0, 0, 0]
@@ -42,26 +51,22 @@ class ScreenShotApp:
         with mouse.Listener(on_click=self.on_click) as listener:
             listener.join()
 
-    def start(self):
-        print('start')
+    # def start(self):
+    #     print('start')
     #     root.bind('<KeyPress>', self.on_click_keyboard)
     #     root.bind('<KeyRelease>', self.on_release_keyboard)
-        self.root.bind('<KeyPress>', self.on_click_keyboard)
-        self.root.bind('<KeyRelease>', self.on_release_keyboard)
-
-        self.root.mainloop()
 
 
-    def on_release_keyboard(self, event):
-        print('{0} release'.format(event.keysym))
-
-        if event.keysym == 'Control_L':
-            print('yes')
-            self.screenshot_activate()
-
-
-    def on_click_keyboard(self, event):
-        print('{0} pressed'.format(event.keysym))
+    # def on_release_keyboard(self, event):
+    #     print('{0} release'.format(event.keysym))
+    #
+    #     if event.keysym == 'Control_L':
+    #         print('yes')
+    #         self.screenshot_activate()
+    #
+    #
+    # def on_click_keyboard(self, event):
+    #     print('{0} pressed'.format(event.keysym))
 
     def get_res(self):
         return self.res
@@ -106,7 +111,7 @@ class ScreenShotApp:
                     image = pyscreenshot.grab(bbox=(self.arr[2], self.arr[3], self.arr[0], self.arr[1]))
 
                 image.save(self.path)
-                self.set_res(TextRecognition().text_recognition(self.path))
+                # self.set_res(TextRecognition().text_recognition(self.path))
 
             except Exception:
 
@@ -114,9 +119,4 @@ class ScreenShotApp:
 
             finally:
                 return False
-
-
-
-app = ScreenShotApp()
-app.start()
 

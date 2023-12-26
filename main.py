@@ -15,6 +15,8 @@ ctk.set_default_color_theme("GUI/Themes/TransLave.json")
 ctk.set_appearance_mode("dark")
 
 
+file_path = r"assets\new.png"
+
 class App(ctk.CTk):
     def __init__(self):
         super().__init__()
@@ -122,10 +124,11 @@ class MainWindow(ctk.CTkFrame):
 
         "MainFrame"
 
-        self.main_frame.columnconfigure((0,1), weight=1)
-        self.main_frame.rowconfigure((0,1), weight=1)
+        self.main_frame.columnconfigure((0, 1), weight=1)
+        self.main_frame.rowconfigure((0, 1), weight=1)
 
         self.text_translation = ctk.CTkTextbox(self.main_frame, activate_scrollbars=True)
+
         self.text_translation.grid(
             row=0, column=0,
             padx=10, pady=30,
@@ -233,7 +236,7 @@ class SettingsWindow(ctk.CTkFrame):
                 for i, frame in enumerate(img[2:]):
                     self.main_frame.update()
                     self.volcano_button.configure(self.main_frame,
-                                                  anchor=(0,0),
+                                                  anchor=(0, 0),
                                                   fg_color=("#ff9300", "#464a55",),
                                                   state="disabled",
                                                   image=ctk.CTkImage(light_image=frame,
@@ -249,12 +252,30 @@ class SettingsWindow(ctk.CTkFrame):
         self.main_frame.rowconfigure(1, weight=1)
         self.volcano_button.grid(row=1, column=3, sticky="se")
 
+
+def on_release_keyboard(event):
+    print('{0} release'.format(event.keysym))
+
+    if event.keysym == 'Control_L':
+        print('yes')
+        intp.screenshot_activate()
+
+
+def on_click_keyboard(event):
+    print('{0} pressed'.format(event.keysym))
+
+
 if __name__ == "__main__":
     app = App()
+
+    intp = test.ScreenShotApp()
+    app.bind('<KeyPress>', on_click_keyboard)
+    app.bind('<KeyRelease>', on_release_keyboard)
+
     app.mainloop()
 
 
     # text_rec = test.ScreenShotApp()
     # text_rec.start()
-"Не работает, посмотри метод bind в Tkinter, можешь применить его как self.bind в классе APP"
+
 
