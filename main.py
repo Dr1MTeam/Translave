@@ -8,11 +8,33 @@ from PIL import Image, ImageSequence
 
 import threading as th
 import time
-import test
 
+from test import TextRecognition
+from test import ScreenShotApp
 
 ctk.set_default_color_theme("GUI/Themes/TransLave.json")
 ctk.set_appearance_mode("dark")
+
+text_trans = []
+
+def on_release_keyboard(event):
+    print('{0} release'.format(event.keysym))
+
+    if event.keysym == 'Control_L':
+        print('yes')
+        inpt.screenshot_activate()
+        global text_trans
+        text_trans.append(text_rec.text_recognition(path))
+        print(text_trans)
+
+
+def on_click_keyboard(event):
+    print('{0} pressed'.format(event.keysym))
+
+
+def binds():
+    app.bind('<KeyPress>', on_click_keyboard)
+    app.bind('<KeyRelease>', on_release_keyboard)
 
 
 class App(ctk.CTk):
@@ -121,20 +143,43 @@ class MainWindow(ctk.CTkFrame):
             relwidth=1, relheight=0.80)
 
         "MainFrame"
-
         self.main_frame.columnconfigure((0,1), weight=1)
         self.main_frame.rowconfigure((0,1), weight=1)
 
         self.text_translation = ctk.CTkTextbox(self.main_frame, activate_scrollbars=True)
         self.text_translation.grid(
-            row=0, column=0,
+            row=1, column=0,
             padx=10, pady=30,
             rowspan=1, sticky='nswe',)
         self.text_to_translate = ctk.CTkTextbox(self.main_frame,activate_scrollbars=True)
         self.text_to_translate.grid(
-            row=0, column=1,
+            row=1, column=1,
             padx=10, pady=30,
             rowspan=1, sticky='nswe',)
+
+
+        def update_f():
+
+                print("CURRENT TEXT IN UPDATE", text_trans)
+
+                self.text_translation.insert("0.0", text_trans)
+                self.text_translation.update()
+
+        self.button_to_update_text = ctk.CTkButton(self.main_frame, command=update_f, text="Вставить текст")
+        self.button_to_update_text.grid(row=0,  column=0,
+                                        padx=10, pady=30, sticky='nswe',)
+
+
+        def translate_f():
+            # Здесь функция перевода текста
+            self.text_to_translate.insert("0.0", 0) #второе поле - текст из функции перевода
+            self.text_to_translate.update()
+
+        self.button_to_update_text = ctk.CTkButton(self.main_frame, command=translate_f, text="Сделать перевод")
+        self.button_to_update_text.grid(row=0,  column=1,
+                                        padx=10, pady=30, sticky='nswe',)
+
+
 
 
 class SettingsWindow(ctk.CTkFrame):
@@ -145,7 +190,6 @@ class SettingsWindow(ctk.CTkFrame):
 
         parent.grid_columnconfigure(0,  weight=1)
         parent.grid_rowconfigure(0, weight=1)
-        
 
         self.main_frame.place(
             x=0, rely=0.15,
@@ -243,14 +287,23 @@ class SettingsWindow(ctk.CTkFrame):
                     self.main_frame.update()
                     time.sleep(0.16)
 
-        a = th.Thread(daemon=True, target=gif,args=[imgr])
+        a = th.Thread(daemon=True, target=gif, args=[imgr])
         a.start()
         self.main_frame.columnconfigure(3, weight=1)
         self.main_frame.rowconfigure(1, weight=1)
         self.volcano_button.grid(row=1, column=3, sticky="se")
 
+
 if __name__ == "__main__":
+
+    inpt = ScreenShotApp()
+    text_rec = TextRecognition()
+    path = r"assets\new.png"
+
+    #input_listener = th.Thread(daemon=True, target=ScreenShotApp.start)
+    #input_listener.start()
     app = App()
+    binds()
     app.mainloop()
 
 
